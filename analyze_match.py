@@ -293,27 +293,7 @@ for r in rows:
     print(f"    {r['ending']:<30}  {r['cnt']}")
 
 
-# ── 13. RETURN DEPTH ─────────────────────────────────────────────────────────
-section("RETURN DEPTH (as returner)")
 
-cursor.execute(f"""
-    SELECT return_depth, COUNT(*) AS total,
-           SUM(point_winner = %s) AS won
-    FROM points
-    WHERE match_id IN ({ids_placeholder})
-      AND returner = %s
-      AND return_depth IS NOT NULL
-    GROUP BY return_depth
-    ORDER BY FIELD(return_depth, 'short', 'mid', 'deep')
-""", [PLAYER] + match_ids + [PLAYER])
-rows = cursor.fetchall()
-total_ret = sum(r["total"] for r in rows)
-print(f"\n  {'Depth':<12} {'Count':<8} {'% Used':<10} {'Pts Won'}")
-print(f"  {'-'*45}")
-depth_labels = {'short': 'short (7)', 'mid': 'mid (8)', 'deep': 'deep (9)'}
-for r in rows:
-    label = depth_labels.get(r["return_depth"], r["return_depth"])
-    print(f"  {label:<12} {r['total']:<8} {pct(r['total'], total_ret):<10} {pct(r['won'] or 0, r['total'])}")
 
 # ── DONE ──────────────────────────────────────────────────────────────────────
 print(f"\n{'='*60}")
