@@ -1,10 +1,12 @@
 import sys
+import os
 import pandas as pd
 from openpyxl import load_workbook
 
 # ── 1. LOAD THE MATCH FILE ────────────────────────────────────────────────────
 DEFAULT_FILE = "data/MatchChart 2026 Dove Men+Care Concepcion Felipe Meligeni Alves Juan Pablo Varillas.xlsm"
 FILE = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_FILE
+MATCH_LABEL = sys.argv[2] if len(sys.argv) > 2 else "unknown"
 
 wb = load_workbook(FILE, read_only=True, data_only=True)
 ws = wb["MATCH"]
@@ -95,6 +97,7 @@ for row in ws.iter_rows(min_row=18, max_row=600, values_only=True):
     if row[0] is None:
         break
 
+    
     point_num += 1
     server_num      = row[10]
     first_raw       = row[13]
@@ -146,6 +149,7 @@ for row in ws.iter_rows(min_row=18, max_row=600, values_only=True):
                                 is_forced, is_unforced, is_double)
 
     parsed.append({
+        "match_label": MATCH_LABEL,
         "point": point_num, "server": server, "returner": returner,
         "serve_number": serve_num, "serve_dir": serve_dir,
         "serve_dir_2nd": serve_dir_2nd, "first_fault": first_fault,
@@ -164,7 +168,7 @@ for row in ws.iter_rows(min_row=18, max_row=600, values_only=True):
     })
 
 # ── 6. BUILD DATAFRAME ────────────────────────────────────────────────────────
-cols = ["point", "server", "returner", "serve_number", "serve_dir",
+cols = ["match_label", "point", "server", "returner", "serve_number", "serve_dir",
         "serve_dir_2nd", "first_fault", "rally_length", "last_shot",
         "outcome", "is_ace", "error_loc", "point_winner", "error_maker",
         "set1", "set2", "gm1", "gm2", "point_score", "gm_winner", "set_winner", "return_depth",
@@ -195,5 +199,5 @@ print(f"\nPoints won:")
 print(df["point_winner"].value_counts())
 
 # ── 8. EXPORT ─────────────────────────────────────────────────────────────────
-df.to_csv("data/match_parsed.csv", index=False)
+df.to_csv("data/match_parsed_all.csv", mode="a", header=not os.path.exists("data/match_parsed_all.csv"), index=False)
 print(f"\nDone! Saved to data/match_parsed.csv")
